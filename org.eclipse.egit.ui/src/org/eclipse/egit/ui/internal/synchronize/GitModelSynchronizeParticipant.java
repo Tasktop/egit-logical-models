@@ -97,8 +97,6 @@ public class GitModelSynchronizeParticipant extends ModelSynchronizeParticipant 
 
 	private static final String DST_REV_KEY = "dstRev"; //$NON-NLS-1$
 
-	private static final String INCLUDE_LOCAL_KEY = "inludeLocal"; //$NON-NLS-1$
-
 	private static final String FORCE_FETCH_KEY = "forceFetch"; //$NON-NLS-1$
 
 
@@ -253,7 +251,6 @@ public class GitModelSynchronizeParticipant extends ModelSynchronizeParticipant 
 			child.putString(CONTAINER_PATH_KEY, getPathForContainer(mapping.getContainer()));
 			child.putString(SRC_REV_KEY, gsd.getSrcRev());
 			child.putString(DST_REV_KEY, gsd.getDstRev());
-			child.putBoolean(INCLUDE_LOCAL_KEY, gsd.shouldIncludeLocal());
 			Set<IContainer> includedPaths = gsd.getIncludedPaths();
 			if (includedPaths != null && !includedPaths.isEmpty()) {
 				IMemento paths = child.createChild(INCLUDED_PATHS_NODE_KEY);
@@ -344,12 +341,9 @@ public class GitModelSynchronizeParticipant extends ModelSynchronizeParticipant 
 				continue;
 			String srcRev = child.getString(SRC_REV_KEY);
 			String dstRev = child.getString(DST_REV_KEY);
-			boolean includeLocal = getBoolean(
-					child.getBoolean(INCLUDE_LOCAL_KEY), true);
 			Set<IContainer> includedPaths = getIncludedPaths(child);
 			try {
-				GitSynchronizeData data = new GitSynchronizeData(repo, srcRev,
-						dstRev, includeLocal);
+				GitSynchronizeData data = new GitSynchronizeData(repo, srcRev, dstRev);
 				if (includedPaths != null)
 					data.setIncludedPaths(includedPaths);
 				gsds.add(data);

@@ -38,8 +38,8 @@ public class GitModelRootTest extends GitModelTestCase {
 		// given
 		touchAndSubmit("second commit");
 		GitSynchronizeDataSet gsds = new GitSynchronizeDataSet();
-		gsds.add(new GitSynchronizeData(repo1, HEAD + "~1", HEAD, false));
-		gsds.add(new GitSynchronizeData(repo2, HEAD, HEAD, false));
+		gsds.add(new GitSynchronizeData(repo1, HEAD + "~1", HEAD));
+		gsds.add(new GitSynchronizeData(repo2, HEAD, HEAD));
 
 		// when
 		GitModelRoot root = new GitModelRoot(gsds);

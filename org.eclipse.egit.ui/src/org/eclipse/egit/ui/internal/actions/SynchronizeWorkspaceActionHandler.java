@@ -62,7 +62,7 @@ public class SynchronizeWorkspaceActionHandler extends RepositoryActionHandler {
 			try {
 				Repository repo = entry.getKey();
 				String dstRef = getDstRef(repo, launchFetch);
-				GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, dstRef, true);
+				GitSynchronizeData data = new GitSynchronizeData(repo, GitSynchronizeData.WORKING_TREE, dstRef);
 				Set<IContainer> containers = entry.getValue();
 				if (!containers.isEmpty())
 					data.setIncludedPaths(containers);

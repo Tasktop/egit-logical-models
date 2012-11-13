@@ -47,7 +47,7 @@ public class GitSynchronizeDataTest extends GitTestCase {
 		git.branchCreate().setName("test").setStartPoint("refs/heads/master")
 				.setUpstreamMode(SetupUpstreamMode.TRACK).call();
 		git.checkout().setName("test").call();
-		GitSynchronizeData gsd = new GitSynchronizeData(repo, HEAD, HEAD, false);
+		GitSynchronizeData gsd = new GitSynchronizeData(repo, HEAD, HEAD);
 
 		// when
 		String srcMerge = gsd.getSrcMerge();
@@ -63,8 +63,7 @@ public class GitSynchronizeDataTest extends GitTestCase {
 		git.branchCreate().setName("test2").setStartPoint("refs/heads/master")
 				.setUpstreamMode(SetupUpstreamMode.TRACK).call();
 		git.checkout().setName("test2").call();
-		GitSynchronizeData gsd = new GitSynchronizeData(repo, R_HEADS + "test2",
-				HEAD, false);
+		GitSynchronizeData gsd = new GitSynchronizeData(repo, R_HEADS + "test2", HEAD);
 
 		// when
 		String srcMerge = gsd.getSrcMerge();
@@ -81,8 +80,7 @@ public class GitSynchronizeDataTest extends GitTestCase {
 				.setUpstreamMode(SetupUpstreamMode.TRACK).call();
 		git.checkout().setName("test3").call();
 		repo.renameRef(R_HEADS + "test3", Constants.R_REMOTES + "origin/master").rename();
-		GitSynchronizeData gsd = new GitSynchronizeData(repo, "refs/remotes/origin/master",
-				HEAD, false);
+		GitSynchronizeData gsd = new GitSynchronizeData(repo, "refs/remotes/origin/master", HEAD);
 
 		// when
 		String srcMerge = gsd.getSrcMerge();

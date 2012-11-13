@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.egit.ui.internal.repository.tree.command;
 
+import static org.eclipse.egit.core.synchronize.dto.GitSynchronizeData.WORKING_TREE;
+import static org.eclipse.jgit.lib.Constants.HEAD;
+
 import java.io.IOException;
 import java.util.Set;
 
@@ -27,7 +30,6 @@ import org.eclipse.egit.core.synchronize.dto.GitSynchronizeData;
 import org.eclipse.egit.ui.UIText;
 import org.eclipse.egit.ui.internal.repository.tree.RepositoryTreeNode;
 import org.eclipse.egit.ui.internal.synchronize.GitModelSynchronize;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
@@ -44,16 +46,19 @@ public class SynchronizeCommand extends
 		if (refName == null)
 			return null;
 
-		String secondRefName = Constants.HEAD;
+		final String leftRefName;
 		if (getSelectedNodes(event).size() == 2) {
-			secondRefName = getRefName(getSelectedNodes(event).get(1));
-			if (secondRefName == null)
+			leftRefName = getRefName(getSelectedNodes(event).get(1));
+			if (leftRefName == null)
 				return null;
+		} else if(getSelectedNodes(event).size() == 1) {
+			// compare with working tree
+			leftRefName = WORKING_TREE;
+		} else {
+			// none or three or more selected .. fall back to HEAD?
+			// FIXME: this "magic" seams wrong; should sync abort instead?
+			leftRefName = HEAD;
 		}
-
-		final String secondRefNameParam = secondRefName;
-
-		final boolean includeLocal = getSelectedNodes(event).size() == 1;
 
 		final Repository repo = node.getRepository();
 		Job job = new Job(NLS.bind(UIText.SynchronizeCommand_jobName,
@@ -63,8 +68,7 @@ public class SynchronizeCommand extends
 			protected IStatus run(IProgressMonitor monitor) {
 				GitSynchronizeData data;
 				try {
-					data = new GitSynchronizeData(repo, secondRefNameParam,
-							refName, includeLocal);
+					data = new GitSynchronizeData(repo, leftRefName, refName);
 
 					Set<IProject> projects = data.getProjects();
 					IResource[] resources = projects

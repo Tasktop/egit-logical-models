@@ -180,7 +180,7 @@ public class GitResourceVariantTreeSubscriberTest extends GitTestCase {
 
 	private GitResourceVariantTreeSubscriber createGitResourceVariantTreeSubscriber(
 			String src, String dst) throws IOException {
-		GitSynchronizeData gsd = new GitSynchronizeData(repo, src, dst, false);
+		GitSynchronizeData gsd = new GitSynchronizeData(repo, src, dst);
 		GitSynchronizeDataSet gsds = new GitSynchronizeDataSet(gsd);
 		new GitResourceVariantTreeSubscriber(gsds);
 		return new GitResourceVariantTreeSubscriber(gsds);

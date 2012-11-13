@@ -8,7 +8,7 @@
  *******************************************************************************/
 package org.eclipse.egit.ui.internal.actions;
 
-import static org.eclipse.jgit.lib.Constants.HEAD;
+import static org.eclipse.egit.core.synchronize.dto.GitSynchronizeData.WORKING_TREE;
 import static org.eclipse.jgit.lib.Constants.R_REFS;
 import static org.eclipse.jgit.lib.Constants.R_TAGS;
 
@@ -146,7 +146,7 @@ public class SynchronizeWithMenu extends ContributionItem implements
 				public void widgetSelected(SelectionEvent event) {
 					GitSynchronizeData data;
 					try {
-						data = new GitSynchronizeData(repo, HEAD, name, true);
+						data = new GitSynchronizeData(repo, WORKING_TREE, name);
 						if (!(selectedResource instanceof IProject)) {
 							HashSet<IContainer> containers = new HashSet<IContainer>();
 							containers.add((IContainer) selectedResource);

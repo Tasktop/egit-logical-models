@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.eclipse.egit.ui.view.synchronize;
 
+import static org.eclipse.egit.core.synchronize.dto.GitSynchronizeData.WORKING_TREE;
 import static org.eclipse.egit.ui.UIText.GitModelWorkingTree_workingTree;
 import static org.eclipse.jgit.lib.Constants.HEAD;
 import static org.eclipse.jgit.lib.Constants.MASTER;
@@ -61,7 +62,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		changeFilesInProject();
 
 		// when
-		launchSynchronization(HEAD, R_HEADS + MASTER, false);
+		launchSynchronization(HEAD, R_HEADS + MASTER);
 		setGitChangeSetPresentationModel();
 
 		// then
@@ -82,7 +83,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		changeFilesInProject();
 
 		// when
-		launchSynchronization(HEAD, HEAD, true);
+		launchSynchronization(WORKING_TREE, HEAD);
 		setGitChangeSetPresentationModel();
 
 		// then
@@ -98,7 +99,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		makeChangesAndCommit(PROJ1);
 
 		// when
-		launchSynchronization(INITIAL_TAG, HEAD, false);
+		launchSynchronization(INITIAL_TAG, HEAD);
 		setGitChangeSetPresentationModel();
 
 		// then
@@ -114,7 +115,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		createTag("v0.1");
 
 		// when
-		launchSynchronization(INITIAL_TAG, R_TAGS + "v0.1", false);
+		launchSynchronization(INITIAL_TAG, R_TAGS + "v0.1");
 		setGitChangeSetPresentationModel();
 
 		// then
@@ -129,7 +130,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		changeFilesInProject();
 
 		// when
-		launchSynchronization(HEAD, INITIAL_TAG, true);
+		launchSynchronization(WORKING_TREE, INITIAL_TAG); // FIXME: test case needs to be fixed
 		setGitChangeSetPresentationModel();
 
 		// then
@@ -144,7 +145,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		deleteFileAndCommit(PROJ1);
 
 		// when
-		launchSynchronization(HEAD, HEAD + "~1", true);
+		launchSynchronization(WORKING_TREE, HEAD + "~1");
 		setGitChangeSetPresentationModel();
 
 		// then
@@ -168,7 +169,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		createEmptyRepository();
 
 		// when
-		launchSynchronization(EMPTY_PROJECT, "", "", true);
+		launchSynchronization(EMPTY_PROJECT, "", "");
 		setGitChangeSetPresentationModel();
 
 		// then
@@ -195,7 +196,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		makeChangesAndCommit(PROJ1);
 
 		// compare HEAD against tag
-		launchSynchronization(HEAD, INITIAL_TAG, false);
+		launchSynchronization(HEAD, INITIAL_TAG);
 		setGitChangeSetPresentationModel();
 		SWTBotEditor outgoingCompare = getCompareEditorForFileInGitChangeSet(
 				FILE1, false);
@@ -210,7 +211,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 
 		// when
 		// compare tag against HEAD
-		launchSynchronization(INITIAL_TAG, HEAD, false);
+		launchSynchronization(INITIAL_TAG, HEAD);
 		setGitChangeSetPresentationModel();
 
 		// then
@@ -242,7 +243,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		proj.refreshLocal(IResource.DEPTH_INFINITE, null);
 
 		// when
-		launchSynchronization(INITIAL_TAG, HEAD, true);
+		launchSynchronization(WORKING_TREE, INITIAL_TAG); // FIXME: test case needs to be fixed
 		setGitChangeSetPresentationModel();
 
 		// then
@@ -269,7 +270,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		writer.close();
 
 		// when
-		launchSynchronization(INITIAL_TAG, HEAD, true);
+		launchSynchronization(WORKING_TREE, INITIAL_TAG); // FIXME: test case needs to be fixed
 		setGitChangeSetPresentationModel();
 
 		// then
@@ -293,7 +294,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		writer.close();
 
 		// when
-		launchSynchronization(INITIAL_TAG, HEAD, true);
+		launchSynchronization(WORKING_TREE, INITIAL_TAG); // FIXME: test case needs to be fixed
 		setGitChangeSetPresentationModel();
 
 		// then
@@ -317,7 +318,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		// given
 		resetRepositoryToCreateInitialTag();
 		changeFilesInProject();
-		launchSynchronization(HEAD, HEAD, true);
+		launchSynchronization(WORKING_TREE, HEAD);
 		setGitChangeSetPresentationModel();
 		getCompareEditorForFileInGitChangeSet(FILE1, true).bot();
 
@@ -345,7 +346,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		// given
 		resetRepositoryToCreateInitialTag();
 		changeFilesInProject();
-		launchSynchronization(HEAD, HEAD, true);
+		launchSynchronization(WORKING_TREE, HEAD);
 		setGitChangeSetPresentationModel();
 		getCompareEditorForFileInGitChangeSet(FILE1, true).bot();
 
@@ -371,7 +372,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		// given
 		String newFileName = "new.txt";
 		resetRepositoryToCreateInitialTag();
-		launchSynchronization(INITIAL_TAG, HEAD, true);
+		launchSynchronization(WORKING_TREE, INITIAL_TAG); // FIXME: test case needs to be fixed
 		setGitChangeSetPresentationModel();
 		IProject proj = ResourcesPlugin.getWorkspace().getRoot()
 				.getProject(PROJ1);
@@ -403,7 +404,7 @@ public class SynchronizeViewGitChangeSetModelTest extends
 		// given
 		resetRepositoryToCreateInitialTag();
 		changeFilesInProject();
-		launchSynchronization(HEAD, HEAD, true);
+		launchSynchronization(WORKING_TREE, HEAD);
 		setGitChangeSetPresentationModel();
 
 		// preconditions - sync result should contain two uncommitted changes

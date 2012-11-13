@@ -77,8 +77,7 @@ public class GitResourceVariantTreeTest extends GitTestCase {
 		// when
 		new Git(repo).commit().setAuthor("JUnit", "junit@egit.org")
 				.setMessage("Initial commit").call();
-		GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, HEAD,
-				false);
+		GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, HEAD);
 		GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
 
 		// given
@@ -109,8 +108,7 @@ public class GitResourceVariantTreeTest extends GitTestCase {
 			new ConnectProviderOperation(secondIProject, gitDir).execute(null);
 			new Git(repo).commit().setAuthor("JUnit", "junit@egit.org")
 					.setMessage("Initial commit").call();
-			GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, HEAD,
-					false);
+			GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, HEAD);
 			GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
 
 			// given
@@ -149,8 +147,7 @@ public class GitResourceVariantTreeTest extends GitTestCase {
 		// when
 		new Git(repo).commit().setAuthor("JUnit", "junit@egit.org")
 				.setMessage("Initial commit").call();
-		GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, MASTER,
-				false);
+		GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, MASTER);
 		GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
 
 		// given
@@ -175,8 +172,7 @@ public class GitResourceVariantTreeTest extends GitTestCase {
 				"class Main {}");
 		new Git(repo).commit().setAuthor("JUnit", "junit@egit.org")
 				.setMessage("Initial commit").call();
-		GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, MASTER,
-				false);
+		GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, MASTER);
 		GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
 		GitSyncCache cache = GitSyncCache.getAllData(dataSet,
 				new NullProgressMonitor());
@@ -204,8 +200,7 @@ public class GitResourceVariantTreeTest extends GitTestCase {
 		testRepo.appendContentAndCommit(iProject, file, "class Main {}",
 				"initial commit");
 		IFile mainJava = testRepo.getIFile(iProject, file);
-		GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, MASTER,
-				false);
+		GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, MASTER);
 		GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
 		GitSyncCache cache = GitSyncCache.getAllData(dataSet,
 				new NullProgressMonitor());
@@ -241,8 +236,7 @@ public class GitResourceVariantTreeTest extends GitTestCase {
 				Constants.R_HEADS + "test");
 		testRepo.appendContentAndCommit(iProject, file, "// test",
 				"first commit");
-		GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, MASTER,
-				true);
+		GitSynchronizeData data = new GitSynchronizeData(repo, HEAD, MASTER);
 		GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
 		GitSyncCache cache = GitSyncCache.getAllData(dataSet,
 				new NullProgressMonitor());

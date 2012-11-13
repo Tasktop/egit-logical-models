@@ -65,7 +65,7 @@ public class GitSubscriberMergeContextTest extends GitTestCase {
 
 	@Test
 	public void markAsMerged() throws Exception {
-		GitSynchronizeData gsd = new GitSynchronizeData(repo, HEAD, HEAD, false);
+		GitSynchronizeData gsd = new GitSynchronizeData(repo, HEAD, HEAD);
 		GitSynchronizeDataSet gsds = new GitSynchronizeDataSet(gsd);
 		GitResourceVariantTreeSubscriber subscriber = new GitResourceVariantTreeSubscriber(
 				gsds);

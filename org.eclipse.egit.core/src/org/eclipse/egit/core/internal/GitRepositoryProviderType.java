@@ -42,7 +42,7 @@ public class GitRepositoryProviderType extends RepositoryProviderType {
 					.getRepositoryCache().getAllRepositories();
 			for (int i = 0; i < repositories.length; i++) {
 				GitSynchronizeData data = new GitSynchronizeData(
-						repositories[i], Constants.HEAD, Constants.HEAD, true);
+						repositories[i], GitSynchronizeData.WORKING_TREE, Constants.HEAD);
 				set.add(data);
 			}
 		} catch (IOException e) {

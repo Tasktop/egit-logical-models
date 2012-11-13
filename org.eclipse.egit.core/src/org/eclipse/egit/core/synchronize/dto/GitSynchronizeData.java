@@ -9,10 +9,12 @@
 package org.eclipse.egit.core.synchronize.dto;
 
 import static org.eclipse.core.runtime.Assert.isNotNull;
+import static org.eclipse.core.runtime.Assert.isTrue;
 import static org.eclipse.egit.core.RevUtils.getCommonAncestor;
 import static org.eclipse.jgit.lib.ConfigConstants.CONFIG_BRANCH_SECTION;
 import static org.eclipse.jgit.lib.ConfigConstants.CONFIG_KEY_MERGE;
 import static org.eclipse.jgit.lib.ConfigConstants.CONFIG_KEY_REMOTE;
+import static org.eclipse.jgit.lib.Constants.HEAD;
 import static org.eclipse.jgit.lib.Constants.R_HEADS;
 import static org.eclipse.jgit.lib.Constants.R_REMOTES;
 
@@ -43,24 +45,32 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 public class GitSynchronizeData {
 
 	private static final IWorkspaceRoot ROOT = ResourcesPlugin.getWorkspace()
-					.getRoot();
+			.getRoot();
 
 	/**
 	 * Matches all strings that start from R_HEADS
 	 */
-	public static final Pattern BRANCH_NAME_PATTERN = Pattern.compile("^" + R_HEADS + ".*?"); //$NON-NLS-1$ //$NON-NLS-2$
+	public static final Pattern BRANCH_NAME_PATTERN = Pattern
+			.compile("^" + R_HEADS + ".*?"); //$NON-NLS-1$ //$NON-NLS-2$
 
-	private final boolean includeLocal;
+	/**
+	 * special source reference to identify synchronization with files in the working
+	 * tree (workspace)
+	 */
+	public static final String WORKING_TREE = "WORKING_TREE"; //$NON-NLS-1$
+
+	/** special reference to identify synchronization with files in the index */
+	public static final String INDEX = "INDEX"; //$NON-NLS-1$
 
 	private final Repository repo;
 
-	private final String srcRemote;
+	private final String srcRev;
 
-	private final String dstRemote;
+	private final String dstRev;
 
-	private final String srcMerge;
+	private final RemoteConfig srcRemoteConfig;
 
-	private final String dstMerge;
+	private final RemoteConfig dstRemoteConfig;
 
 	private RevCommit srcRevCommit;
 
@@ -70,23 +80,25 @@ public class GitSynchronizeData {
 
 	private final Set<IProject> projects;
 
+	private Set<IContainer> includedPaths;
+
 	private final String repoParentPath;
-
-	private final String srcRev;
-
-	private final String dstRev;
 
 	private TreeFilter pathFilter;
 
-	private Set<IContainer> includedPaths;
-
 	private static class RemoteConfig {
 		final String remote;
+
 		final String merge;
+
 		public RemoteConfig(String remote, String merge) {
 			this.remote = remote;
 			this.merge = merge;
 		}
+	}
+
+	private static boolean shouldUseHead(String refName) {
+		return WORKING_TREE.equals(refName) || INDEX.equals(refName);
 	}
 
 	/**
@@ -95,29 +107,22 @@ public class GitSynchronizeData {
 	 * @param repository
 	 * @param srcRev
 	 * @param dstRev
-	 * @param includeLocal
-	 *            <code>true</code> if local changes should be included in
-	 *            comparison
 	 * @throws IOException
 	 */
 	public GitSynchronizeData(Repository repository, String srcRev,
-			String dstRev, boolean includeLocal) throws IOException {
+			String dstRev) throws IOException {
 		isNotNull(repository);
 		isNotNull(srcRev);
 		isNotNull(dstRev);
+		isTrue(!WORKING_TREE.equals(dstRev)); // limitation/assumption in Team UI
 		repo = repository;
 		this.srcRev = srcRev;
 		this.dstRev = dstRev;
-		this.includeLocal = includeLocal;
 
-		RemoteConfig srcRemoteConfig = extractRemoteName(srcRev);
-		RemoteConfig dstRemoteConfig = extractRemoteName(dstRev);
-
-		srcRemote = srcRemoteConfig.remote;
-		srcMerge = srcRemoteConfig.merge;
-
-		dstRemote = dstRemoteConfig.remote;
-		dstMerge = dstRemoteConfig.merge;
+		srcRemoteConfig = extractRemoteName(shouldUseHead(srcRev) ? HEAD
+				: srcRev);
+		dstRemoteConfig = extractRemoteName(shouldUseHead(dstRev) ? HEAD
+				: dstRev);
 
 		repoParentPath = repo.getDirectory().getParentFile().getAbsolutePath();
 
@@ -139,8 +144,8 @@ public class GitSynchronizeData {
 	public void updateRevs() throws IOException {
 		ObjectWalk ow = new ObjectWalk(repo);
 		try {
-			srcRevCommit = getCommit(srcRev, ow);
-			dstRevCommit = getCommit(dstRev, ow);
+			srcRevCommit = getCommit(shouldUseHead(srcRev) ? HEAD : srcRev, ow);
+			dstRevCommit = getCommit(shouldUseHead(dstRev) ? HEAD : dstRev, ow);
 		} finally {
 			ow.release();
 		}
@@ -164,21 +169,14 @@ public class GitSynchronizeData {
 	 *         remote branch
 	 */
 	public String getSrcRemoteName() {
-		return srcRemote;
-	}
-
-	/**
-	 * @return ref specification of destination merge branch
-	 */
-	public String getDstMerge() {
-		return dstMerge;
+		return srcRemoteConfig.remote;
 	}
 
 	/**
 	 * @return ref specification of source merge branch
 	 */
 	public String getSrcMerge() {
-		return srcMerge;
+		return srcRemoteConfig.merge;
 	}
 
 	/**
@@ -186,7 +184,14 @@ public class GitSynchronizeData {
 	 *         branch is not a remote branch
 	 */
 	public String getDstRemoteName() {
-		return dstRemote;
+		return dstRemoteConfig.remote;
+	}
+
+	/**
+	 * @return ref specification of destination merge branch
+	 */
+	public String getDstMerge() {
+		return dstRemoteConfig.merge;
 	}
 
 	/**
@@ -221,9 +226,10 @@ public class GitSynchronizeData {
 	/**
 	 * @return <code>true</code> if local changes should be included in
 	 *         comparison
+	 * @deprecated use {@link #WORKING_TREE} or {@link #INDEX}
 	 */
 	public boolean shouldIncludeLocal() {
-		return includeLocal;
+		return WORKING_TREE.equals(srcRev);
 	}
 
 	/**

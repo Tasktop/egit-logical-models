@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.eclipse.egit.ui.view.synchronize;
 
+import static org.eclipse.egit.core.synchronize.dto.GitSynchronizeData.WORKING_TREE;
 import static org.eclipse.jgit.lib.Constants.HEAD;
 import static org.eclipse.jgit.lib.Constants.MASTER;
 import static org.eclipse.jgit.lib.Constants.R_HEADS;
@@ -52,7 +53,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		changeFilesInProject();
 
 		// when
-		launchSynchronization(HEAD, R_HEADS + MASTER, false);
+		launchSynchronization(HEAD, R_HEADS + MASTER);
 
 		// then
 		SWTBot viewBot = bot.viewByTitle("Synchronize").bot();
@@ -72,7 +73,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		changeFilesInProject();
 
 		// when
-		launchSynchronization(HEAD, HEAD, true);
+		launchSynchronization(WORKING_TREE, HEAD);
 
 		// then
 		SWTBotTree syncViewTree = bot.viewByTitle("Synchronize").bot().tree();
@@ -87,7 +88,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		makeChangesAndCommit(PROJ1);
 
 		// when
-		launchSynchronization(INITIAL_TAG, HEAD, false);
+		launchSynchronization(INITIAL_TAG, HEAD);
 
 		// then
 		SWTBotTree syncViewTree = bot.viewByTitle("Synchronize").bot().tree();
@@ -102,7 +103,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		createTag("v0.1");
 
 		// when
-		launchSynchronization(INITIAL_TAG, R_TAGS + "v0.1", false);
+		launchSynchronization(INITIAL_TAG, R_TAGS + "v0.1");
 
 		// then
 		SWTBotTree syncViewTree = bot.viewByTitle("Synchronize").bot().tree();
@@ -117,7 +118,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		changeFilesInProject();
 
 		// when
-		launchSynchronization(HEAD, INITIAL_TAG, true);
+		launchSynchronization(WORKING_TREE, INITIAL_TAG);
 
 		// then
 		SWTBot compare = getCompareEditorForFileInWorspaceModel(FILE1)
@@ -131,7 +132,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		deleteFileAndCommit(PROJ1);
 
 		// when
-		launchSynchronization(HEAD, HEAD + "~1", true);
+		launchSynchronization(WORKING_TREE, HEAD + "~1");
 
 		// then
 		SWTBotTree syncViewTree = bot.viewByTitle("Synchronize").bot().tree();
@@ -152,7 +153,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		createEmptyRepository();
 
 		// when
-		launchSynchronization(EMPTY_PROJECT, "", "", true);
+		launchSynchronization(EMPTY_PROJECT, "", "");
 
 		// then
 		SWTBotTree syncViewTree = bot.viewByTitle("Synchronize").bot().tree();
@@ -176,7 +177,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		makeChangesAndCommit(PROJ1);
 
 		// compare HEAD against tag
-		launchSynchronization(HEAD, INITIAL_TAG, false);
+		launchSynchronization(HEAD, INITIAL_TAG);
 		SWTBotEditor compEditor = getCompareEditorForFileInWorspaceModel(
 				FILE1);
 		SWTBot outgoingCompare = compEditor.bot();
@@ -188,7 +189,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 
 		// when
 		// compare tag against HEAD
-		launchSynchronization(INITIAL_TAG, HEAD, false);
+		launchSynchronization(INITIAL_TAG, HEAD);
 
 		// then
 		SWTBot incomingComp = getCompareEditorForFileInWorspaceModel(
@@ -221,7 +222,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		proj.refreshLocal(IResource.DEPTH_INFINITE, null);
 
 		// when
-		launchSynchronization(INITIAL_TAG, HEAD, true);
+		launchSynchronization(WORKING_TREE, INITIAL_TAG); // FIXME: test case needs to be fixed
 
 		// then
 		SWTBotTree syncViewTree = bot.viewByTitle("Synchronize").bot().tree();
@@ -235,7 +236,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		// given
 		String newFileName = "new.txt";
 		resetRepositoryToCreateInitialTag();
-		launchSynchronization(INITIAL_TAG, HEAD, true);
+		launchSynchronization(WORKING_TREE, INITIAL_TAG); // FIXME: test case needs to be fixed
 		IProject proj = ResourcesPlugin.getWorkspace().getRoot()
 				.getProject(PROJ1);
 
@@ -260,7 +261,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		// given
 		resetRepositoryToCreateInitialTag();
 		changeFilesInProject();
-		launchSynchronization(HEAD, HEAD, true);
+		launchSynchronization(WORKING_TREE, HEAD);
 
 		// preconditions - sync result should contain two uncommitted changes
 		SWTBotTree syncViewTree = bot.viewByTitle("Synchronize").bot().tree();
@@ -296,7 +297,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		writer.close();
 
 		// when
-		launchSynchronization(INITIAL_TAG, HEAD, true);
+		launchSynchronization(WORKING_TREE, INITIAL_TAG); // FIXME: test case needs to be fixed
 
 		// then
 		SWTBotTree syncViewTree = bot.viewByTitle("Synchronize").bot().tree();
@@ -318,7 +319,7 @@ public class SynchronizeViewWorkspaceModelTest extends AbstractSynchronizeViewTe
 		writer.close();
 
 		// when
-		launchSynchronization(INITIAL_TAG, HEAD, true);
+		launchSynchronization(WORKING_TREE, INITIAL_TAG); // FIXME: test case needs to be fixed
 
 		// then
 		SWTBotTree syncViewTree = bot.viewByTitle("Synchronize").bot().tree();

@@ -169,20 +169,18 @@ public abstract class AbstractSynchronizeViewTest extends
 		commit(projectName);
 	}
 
-	protected void launchSynchronization(String srcRef, String dstRef,
-			boolean includeLocal) throws InterruptedException, IOException {
-		launchSynchronization(PROJ1, srcRef, dstRef, includeLocal);
+	protected void launchSynchronization(String srcRef, String dstRef)
+			throws InterruptedException, IOException {
+		launchSynchronization(PROJ1, srcRef, dstRef);
 	}
 
 	protected void launchSynchronization(String projectName, String srcRef,
-			String dstRef, boolean includeLocal) throws InterruptedException,
-			IOException {
+			String dstRef) throws InterruptedException, IOException {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot()
 				.getProject(projectName);
 		Repository repo = RepositoryMapping.getMapping(project).getRepository();
 
-		GitSynchronizeData data = new GitSynchronizeData(repo, srcRef, dstRef,
-				includeLocal);
+		GitSynchronizeData data = new GitSynchronizeData(repo, srcRef, dstRef);
 
 		GitModelSynchronize.launch(data, new IResource[] { project });
 

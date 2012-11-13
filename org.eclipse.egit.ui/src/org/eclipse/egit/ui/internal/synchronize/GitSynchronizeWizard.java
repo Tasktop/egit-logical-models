@@ -66,9 +66,9 @@ public class GitSynchronizeWizard extends Wizard {
 		for (Entry<Repository, String> branchesEntry : branches.entrySet())
 			try {
 				Repository repo = branchesEntry.getKey();
-				GitSynchronizeData data = new GitSynchronizeData(
-						repo, HEAD, branchesEntry.getValue(),
-						shouldIncludeLocal);
+				GitSynchronizeData data = new GitSynchronizeData(repo,
+						shouldIncludeLocal ? GitSynchronizeData.WORKING_TREE
+								: HEAD, branchesEntry.getValue());
 				Set<IContainer> containers = getSelectedContainers(repo);
 				if (containers != null && containers.size() > 0)
 					data.setIncludedPaths(containers);

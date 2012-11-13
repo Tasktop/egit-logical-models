@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.eclipse.egit.ui.internal.synchronize.model;
 
+import static org.eclipse.egit.core.synchronize.dto.GitSynchronizeData.WORKING_TREE;
 import static org.eclipse.jgit.lib.Constants.HEAD;
 import static org.mockito.Mockito.mock;
 
@@ -54,8 +55,7 @@ abstract class GitModelTestCase extends LocalRepositoryTestCase {
 	}
 
 	protected GitSynchronizeData getGSD(Repository repo) throws IOException {
-		return new GitSynchronizeData(repo, Constants.HEAD,
-				Constants.HEAD, true);
+		return new GitSynchronizeData(repo, WORKING_TREE, Constants.HEAD);
 	}
 
 	protected IPath getTreeLocation() {
