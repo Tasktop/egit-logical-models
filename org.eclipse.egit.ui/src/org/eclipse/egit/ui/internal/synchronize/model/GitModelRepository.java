@@ -8,6 +8,9 @@
  *******************************************************************************/
 package org.eclipse.egit.ui.internal.synchronize.model;
 
+import static org.eclipse.egit.core.synchronize.dto.GitSynchronizeData.INDEX;
+import static org.eclipse.egit.core.synchronize.dto.GitSynchronizeData.WORKING_TREE;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -74,8 +77,14 @@ public class GitModelRepository extends GitModelObjectContainer implements HasPr
 		if (commitCache != null && !commitCache.isEmpty())
 			result.addAll(getListOfCommit(commitCache));
 
-		result.addAll(getWorkingChanges());
-		disposeOldChildren();
+		if(WORKING_TREE.equals(gsd.getSrcRev())) {
+			result.add(getWorkingTreeChanges());
+			result.add(getStagedChanges()); // TODO: also include staged changes here?
+		} else if(INDEX.equals(gsd.getSrcRev())) {
+			result.add(getStagedChanges());
+		}
+
+		disposeChildren();
 		children = result.toArray(new GitModelObjectContainer[result.size()]);
 
 		return children;
@@ -122,7 +131,7 @@ public class GitModelRepository extends GitModelObjectContainer implements HasPr
 
 	@Override
 	public void dispose() {
-		disposeOldChildren();
+		disposeChildren();
 	}
 
 	@Override
@@ -161,27 +170,16 @@ public class GitModelRepository extends GitModelObjectContainer implements HasPr
 		return result;
 	}
 
-	private List<GitModelObjectContainer> getWorkingChanges() {
-		List<GitModelObjectContainer> result = new ArrayList<GitModelObjectContainer>();
-		if (gsd.shouldIncludeLocal()) {
-			Repository repo = gsd.getRepository();
-			Map<String, Change> stagedChanges = StagedChangeCache.build(repo);
-			GitModelCache gitCache = new GitModelCache(this, repo,
-					stagedChanges);
-			int gitCacheLen = gitCache.getChildren().length;
+	private GitModelObjectContainer getWorkingTreeChanges() {
+		Repository repo = gsd.getRepository();
+		Map<String, Change> workingChanges = WorkingTreeChangeCache.build(repo);
+		return new GitModelWorkingTree(this, repo, workingChanges);
+	}
 
-			Map<String, Change> workingChanges = WorkingTreeChangeCache.build(repo);
-			GitModelWorkingTree gitWorkingTree = new GitModelWorkingTree(this,
-					repo, workingChanges);
-			int gitWorkingTreeLen = gitWorkingTree.getChildren().length;
-
-			if (gitCacheLen > 0 || gitWorkingTreeLen > 0) {
-				result.add(gitCache);
-				result.add(gitWorkingTree);
-			}
-		}
-
-		return result;
+	private GitModelObjectContainer getStagedChanges() {
+		Repository repo = gsd.getRepository();
+		Map<String, Change> stagedChanges = StagedChangeCache.build(repo);
+		return new GitModelCache(this, repo, stagedChanges);
 	}
 
 	/**
@@ -191,12 +189,12 @@ public class GitModelRepository extends GitModelObjectContainer implements HasPr
 		return gsd.getRepository();
 	}
 
-	private void disposeOldChildren() {
+	private void disposeChildren() {
 		if (children == null)
 			return;
 		for (GitModelObject child : children)
 			child.dispose();
-
+		children = null;
 	}
 
 }

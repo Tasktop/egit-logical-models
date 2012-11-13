@@ -35,6 +35,7 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.ObjectWalk;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.treewalk.filter.PathFilterGroup;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
@@ -63,14 +64,13 @@ public class GitSynchronizeData {
 	public static final String INDEX = "INDEX"; //$NON-NLS-1$
 
 	private final Repository repo;
-
 	private final String srcRev;
 
 	private final String dstRev;
 
-	private final RemoteConfig srcRemoteConfig;
+	private final RemoteBranchInfo srcRemoteConfig;
 
-	private final RemoteConfig dstRemoteConfig;
+	private final RemoteBranchInfo dstRemoteConfig;
 
 	private RevCommit srcRevCommit;
 
@@ -86,12 +86,13 @@ public class GitSynchronizeData {
 
 	private TreeFilter pathFilter;
 
-	private static class RemoteConfig {
-		final String remote;
+	private RemoteConfig fetchFromRemote;
 
+	private static class RemoteBranchInfo {
+		final String remote;
 		final String merge;
 
-		public RemoteConfig(String remote, String merge) {
+		public RemoteBranchInfo(String remote, String merge) {
 			this.remote = remote;
 			this.merge = merge;
 		}
@@ -297,7 +298,7 @@ public class GitSynchronizeData {
 		return dstRev;
 	}
 
-	private RemoteConfig extractRemoteName(String rev) {
+	private RemoteBranchInfo extractRemoteName(String rev) {
 		if (rev.contains(R_REMOTES)) {
 			String remoteWithBranchName = rev.replaceAll(R_REMOTES, ""); //$NON-NLS-1$
 			int firstSeparator = remoteWithBranchName.indexOf("/"); //$NON-NLS-1$
@@ -306,7 +307,7 @@ public class GitSynchronizeData {
 			String name = remoteWithBranchName.substring(firstSeparator + 1,
 					remoteWithBranchName.length());
 
-			return new RemoteConfig(remote, R_HEADS + name);
+			return new RemoteBranchInfo(remote, R_HEADS + name);
 		} else {
 			String realName;
 			Ref ref;
@@ -325,7 +326,7 @@ public class GitSynchronizeData {
 			String merge = repo.getConfig().getString(CONFIG_BRANCH_SECTION,
 					name, CONFIG_KEY_MERGE);
 
-			return new RemoteConfig(remote, merge);
+			return new RemoteBranchInfo(remote, merge);
 		}
 	}
 
@@ -335,6 +336,20 @@ public class GitSynchronizeData {
 			return id != null ? ow.parseCommit(id) : null;
 		} else
 			return null;
+	}
+
+	/**
+	 * @return the remote configuration to fetch from before synchronizing
+	 */
+	public RemoteConfig getFetchFromRemote() {
+		return fetchFromRemote;
+	}
+
+	/**
+	 * @param remote the remote configuration to fetch from before synchronizing data
+	 */
+	public void setFetchFromRemote(RemoteConfig remote) {
+		this.fetchFromRemote = remote;
 	}
 
 }

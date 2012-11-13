@@ -15,10 +15,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.mapping.RemoteResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -27,8 +29,11 @@ import org.eclipse.egit.core.synchronize.GitSubscriberMergeContext;
 import org.eclipse.egit.core.synchronize.GitSubscriberResourceMappingContext;
 import org.eclipse.egit.core.synchronize.dto.GitSynchronizeData;
 import org.eclipse.egit.core.synchronize.dto.GitSynchronizeDataSet;
+import org.eclipse.egit.ui.Activator;
 import org.eclipse.egit.ui.JobFamilies;
+import org.eclipse.egit.ui.UIPreferences;
 import org.eclipse.egit.ui.UIText;
+import org.eclipse.egit.ui.internal.fetch.FetchOperationUI;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.core.subscribers.SubscriberScopeManager;
 import org.eclipse.team.ui.TeamUI;
@@ -139,7 +144,24 @@ public class GitModelSynchronize {
 		Job syncJob = new Job(UIText.GitModelSynchonize_fetchGitDataJobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				subscriber.init(monitor);
+				SubMonitor progress  = SubMonitor.convert(monitor, gsdSet.size()+1);
+
+				// fetch if necessary
+				monitor.beginTask(UIText.GitModelSynchonize_fetchGitDataJobName, gsdSet.size()+1);
+				for (GitSynchronizeData gsd : gsdSet) {
+					if(gsd.getFetchFromRemote() != null) {
+						FetchOperationUI fetchOperationUI = new FetchOperationUI(gsd.getRepository(), gsd.getFetchFromRemote(), Activator.getDefault().getPreferenceStore()
+								.getInt(UIPreferences.REMOTE_CONNECTION_TIMEOUT), false);
+						try {
+							fetchOperationUI.execute(progress.newChild(1));
+						} catch (CoreException e) {
+							return Activator.createErrorStatus(e.getStatus()
+									.getMessage(), e);
+						}
+					}
+				}
+
+				subscriber.init(progress.newChild(1));
 
 				return Status.OK_STATUS;
 			}

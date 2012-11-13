@@ -32,20 +32,26 @@ import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.egit.core.synchronize.dto.GitSynchronizeData;
 import org.eclipse.egit.core.synchronize.dto.GitSynchronizeDataSet;
 import org.eclipse.egit.ui.Activator;
-import org.eclipse.egit.ui.UIPreferences;
+import org.eclipse.egit.ui.UIText;
+import org.eclipse.egit.ui.internal.fetch.SimpleConfigureFetchDialog;
 import org.eclipse.egit.ui.internal.synchronize.GitModelSynchronize;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.transport.RemoteConfig;
 
 /**
- * An action that launch synchronization with selected repository
+ * An action that launch synchronization with selected repository and "upstream"
  */
 public class SynchronizeWorkspaceActionHandler extends RepositoryActionHandler {
 
 	@Override
 	public boolean isEnabled() {
-		return true;
+		// need a repository with a configured remote
+		final Repository repository = getRepository();
+		return repository != null
+				&& SimpleConfigureFetchDialog.getConfiguredRemote(repository) != null;
 	}
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -55,14 +61,24 @@ public class SynchronizeWorkspaceActionHandler extends RepositoryActionHandler {
 		if (containerMap.isEmpty())
 			return null;
 
-		boolean launchFetch = Activator.getDefault().getPreferenceStore()
-				.getBoolean(UIPreferences.SYNC_VIEW_FETCH_BEFORE_LAUNCH);
 		GitSynchronizeDataSet gsdSet = new GitSynchronizeDataSet();
-		for (Entry<Repository, Set<IContainer>> entry : containerMap.entrySet())
+		for (Entry<Repository, Set<IContainer>> entry : containerMap.entrySet()) {
 			try {
-				Repository repo = entry.getKey();
-				String dstRef = getDstRef(repo, launchFetch);
-				GitSynchronizeData data = new GitSynchronizeData(repo, GitSynchronizeData.WORKING_TREE, dstRef);
+				Repository repository = entry.getKey();
+				RemoteConfig remote = SimpleConfigureFetchDialog
+						.getConfiguredRemote(repository);
+				if (remote == null) {
+					MessageDialog
+							.openInformation(
+									getShell(event),
+									UIText.SimpleFetchActionHandler_NothingToFetchDialogTitle,
+									UIText.SimpleFetchActionHandler_NothingToFetchDialogMessage);
+					return null;
+				}
+
+				String dstRef = getDstRef(repository);
+				GitSynchronizeData data = new GitSynchronizeData(repository, GitSynchronizeData.WORKING_TREE, dstRef);
+				data.setFetchFromRemote(remote);
 				Set<IContainer> containers = entry.getValue();
 				if (!containers.isEmpty())
 					data.setIncludedPaths(containers);
@@ -71,6 +87,7 @@ public class SynchronizeWorkspaceActionHandler extends RepositoryActionHandler {
 			} catch (IOException e) {
 				Activator.handleError(e.getMessage(), e, true);
 			}
+		}
 
 		GitModelSynchronize.launch(gsdSet, getSelectedResources(event));
 
@@ -99,22 +116,19 @@ public class SynchronizeWorkspaceActionHandler extends RepositoryActionHandler {
 		return result;
 	}
 
-	private String getDstRef(Repository repo, boolean launchFetch) {
-		if (launchFetch) {
-			String realName = getRealBranchName(repo);
-			String name = BRANCH_NAME_PATTERN.matcher(realName).replaceAll(""); //$NON-NLS-1$
-			StoredConfig config = repo.getConfig();
-			String remote = config.getString(CONFIG_BRANCH_SECTION, name,
-					CONFIG_KEY_REMOTE);
-			String merge = config.getString(CONFIG_BRANCH_SECTION, name,
-					CONFIG_KEY_MERGE);
-			if (remote == null || merge == null)
-				return HEAD;
-
-			String mergeBranchName = merge.replace(R_HEADS, ""); //$NON-NLS-1$
-			return R_REMOTES + remote + "/" + mergeBranchName; //$NON-NLS-1$
-		} else
+	private String getDstRef(Repository repo) {
+		String realName = getRealBranchName(repo);
+		String name = BRANCH_NAME_PATTERN.matcher(realName).replaceAll(""); //$NON-NLS-1$
+		StoredConfig config = repo.getConfig();
+		String remote = config.getString(CONFIG_BRANCH_SECTION, name,
+				CONFIG_KEY_REMOTE);
+		String merge = config.getString(CONFIG_BRANCH_SECTION, name,
+				CONFIG_KEY_MERGE);
+		if (remote == null || merge == null)
 			return HEAD;
+
+		String mergeBranchName = merge.replace(R_HEADS, ""); //$NON-NLS-1$
+		return R_REMOTES + remote + "/" + mergeBranchName; //$NON-NLS-1$
 	}
 
 	private String getRealBranchName(Repository repo) {
