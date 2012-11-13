@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.eclipse.egit.core.synchronize;
 
+import static org.eclipse.egit.core.synchronize.dto.GitSynchronizeData.WORKING_TREE;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -112,7 +114,7 @@ class GitSyncCache {
 		try {
 			// setup local tree
 			FileTreeIterator fti = null;
-			if (gsd.shouldIncludeLocal()) {
+			if (WORKING_TREE.equals(gsd.getSrcRev())) {
 				fti = new FileTreeIterator(repo);
 				tw.addTree(fti);
 				if (filter != null)
