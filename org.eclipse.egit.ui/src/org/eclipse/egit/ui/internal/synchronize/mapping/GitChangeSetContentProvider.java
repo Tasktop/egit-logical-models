@@ -30,6 +30,7 @@ import org.eclipse.egit.ui.internal.synchronize.model.GitModelObjectContainer;
 import org.eclipse.egit.ui.internal.synchronize.model.GitModelRepository;
 import org.eclipse.egit.ui.internal.synchronize.model.GitModelRoot;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 import org.eclipse.team.ui.mapping.SynchronizationContentProvider;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
@@ -49,13 +50,23 @@ public class GitChangeSetContentProvider extends SynchronizationContentProvider 
 
 	@Override
 	public boolean hasChildren(Object element) {
-		if (element instanceof GitModelBlob)
+		Object unwrapped = unwrap(element);
+
+		if (unwrapped instanceof GitModelBlob)
 			return false;
 
-		if (element instanceof GitModelObjectContainer)
-			return ((GitModelObjectContainer) element).getChildren().length > 0;
+		if (unwrapped instanceof GitModelObjectContainer)
+			return ((GitModelObjectContainer) unwrapped).getChildren().length > 0;
 
 		return super.hasChildren(element);
+	}
+
+	private Object unwrap(Object elementOrTreePath) {
+		if (elementOrTreePath instanceof TreePath) {
+			TreePath tp = (TreePath) elementOrTreePath;
+			return tp.getLastSegment();
+		}
+		return elementOrTreePath;
 	}
 
 	@Override
