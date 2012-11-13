@@ -78,10 +78,18 @@ public class GitModelRepository extends GitModelObjectContainer implements HasPr
 			result.addAll(getListOfCommit(commitCache));
 
 		if(WORKING_TREE.equals(gsd.getSrcRev())) {
-			result.add(getWorkingTreeChanges());
-			result.add(getStagedChanges()); // TODO: also include staged changes here?
+			GitModelObjectContainer workingTreeChanges = getWorkingTreeChanges();
+			if(workingTreeChanges.getChildren().length > 0)
+				result.add(workingTreeChanges);
+
+			// TODO: does it make sense to also include staged changes here?
+			GitModelObjectContainer stagedChanges = getStagedChanges();
+			if (stagedChanges.getChildren().length > 0)
+				result.add(stagedChanges);
 		} else if(INDEX.equals(gsd.getSrcRev())) {
-			result.add(getStagedChanges());
+			GitModelObjectContainer stagedChanges = getStagedChanges();
+			if (stagedChanges.getChildren().length > 0)
+				result.add(stagedChanges);
 		}
 
 		disposeChildren();
