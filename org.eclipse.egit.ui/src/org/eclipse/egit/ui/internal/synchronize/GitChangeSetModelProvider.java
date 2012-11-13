@@ -17,6 +17,7 @@ import org.eclipse.core.resources.mapping.ResourceMappingContext;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.egit.core.Activator;
+import org.eclipse.egit.core.AdapterUtils;
 import org.eclipse.egit.core.synchronize.GitSubscriberResourceMappingContext;
 import org.eclipse.egit.core.synchronize.dto.GitSynchronizeData;
 import org.eclipse.egit.core.synchronize.dto.GitSynchronizeDataSet;
@@ -31,7 +32,6 @@ public class GitChangeSetModelProvider extends ModelProvider {
 	 * Id of model provider
 	 */
 	public static final String ID = "org.eclipse.egit.ui.changeSetModel"; //$NON-NLS-1$
-
 	private static GitChangeSetModelProvider provider;
 
 	/**
@@ -63,17 +63,14 @@ public class GitChangeSetModelProvider extends ModelProvider {
 			GitSynchronizeData data = gsds.getData(resource.getProject());
 
 			if (data != null) {
-				GitModelObject object = null;
 				try {
-					object = GitModelObject.createRoot(data);
+					GitModelObject object = GitModelObject.createRoot(data);
+					ResourceMapping rm = AdapterUtils.adapt(object,
+							ResourceMapping.class);
+					if (rm != null)
+						return new ResourceMapping[] { rm };
 				} catch (IOException e) {
 					Activator.logError(e.getMessage(), e);
-				}
-
-				if (object != null) {
-					ResourceMapping rm = (ResourceMapping) object
-							.getAdapter(ResourceMapping.class);
-					return new ResourceMapping[] { rm };
 				}
 			}
 		}
