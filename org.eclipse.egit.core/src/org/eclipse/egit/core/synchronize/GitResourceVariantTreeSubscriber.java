@@ -223,7 +223,7 @@ public class GitResourceVariantTreeSubscriber extends
 
 	@Override
 	public IResourceVariantComparator getResourceComparator() {
-		return new GitResourceVariantComparator(gsds);
+		return new GitResourceVariantComparator();
 	}
 
 	@Override

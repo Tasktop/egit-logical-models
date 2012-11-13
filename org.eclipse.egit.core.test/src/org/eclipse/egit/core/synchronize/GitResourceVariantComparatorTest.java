@@ -10,8 +10,6 @@ package org.eclipse.egit.core.synchronize;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
-import static org.eclipse.egit.core.synchronize.dto.GitSynchronizeData.WORKING_TREE;
-import static org.eclipse.jgit.lib.Constants.HEAD;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -29,8 +27,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.egit.core.project.RepositoryMapping;
-import org.eclipse.egit.core.synchronize.dto.GitSynchronizeData;
-import org.eclipse.egit.core.synchronize.dto.GitSynchronizeDataSet;
 import org.eclipse.egit.core.test.GitTestCase;
 import org.eclipse.egit.core.test.TestRepository;
 import org.eclipse.jgit.api.Git;
@@ -85,8 +81,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	@SuppressWarnings("boxing")
 	public void shouldReturnFalseWhenRemoteDoesNotExist() {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		IResource local = mock(IResource.class);
@@ -100,8 +95,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	@SuppressWarnings("boxing")
 	public void shouldReturnFalseWhenRemoteDoesNotExist2() throws Exception {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		IResource local = mock(IResource.class);
@@ -121,8 +115,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	@SuppressWarnings("boxing")
 	public void shouldReturnFalseWhenComparingFileAndContainer() {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		IFile local = mock(IFile.class);
@@ -145,8 +138,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	public void shouldReturnFalseWhenComparingContainerAndContainer()
 			throws Exception {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		IPath localPath = mock(IPath.class);
@@ -178,8 +170,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	public void shouldReturnTrueWhenComparingContainerAndContainer()
 			throws Exception {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		File file = testRepo.createFile(iProject, "test" + File.separator
@@ -213,10 +204,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 		// when
 		byte[] shortContent = "short content".getBytes();
 		byte[] longContent = "very long long content".getBytes();
-		GitSynchronizeData data = new GitSynchronizeData(repo, WORKING_TREE, HEAD);
-		GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				dataSet);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		IFile local = mock(IFile.class);
@@ -251,10 +239,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 		byte[] localContent = "very long long content".getBytes();
 		// this typo should be here
 		byte[] remoteContent = "very long lonk content".getBytes();
-		GitSynchronizeData data = new GitSynchronizeData(repo, WORKING_TREE, HEAD);
-		GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				dataSet);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		IFile local = mock(IFile.class);
@@ -291,10 +276,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 		byte[] remoteContent = new byte[8192];
 		Arrays.fill(remoteContent, (byte) 'a');
 		remoteContent[8101] = 'b';
-		GitSynchronizeData data = new GitSynchronizeData(repo, WORKING_TREE, HEAD);
-		GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				dataSet);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		IFile local = mock(IFile.class);
@@ -335,10 +317,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 		Arrays.fill(localContent, (byte) 'a');
 		byte[] remoteContent = new byte[8200];
 		Arrays.fill(remoteContent, (byte) 'a');
-		GitSynchronizeData data = new GitSynchronizeData(repo, WORKING_TREE, HEAD);
-		GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				dataSet);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		IFile local = mock(IFile.class);
@@ -372,10 +351,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 		// when
 		byte[] localContent = "very long long content".getBytes();
 		byte[] remoteContent = "very long long content".getBytes();
-		GitSynchronizeData data = new GitSynchronizeData(repo, WORKING_TREE, HEAD);
-		GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				dataSet);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		IFile local = mock(IFile.class);
@@ -412,10 +388,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 		Arrays.fill(localContent, (byte) 'a');
 		byte[] remoteContent = new byte[8192];
 		Arrays.fill(remoteContent, (byte) 'a');
-		GitSynchronizeData data = new GitSynchronizeData(repo, WORKING_TREE, HEAD);
-		GitSynchronizeDataSet dataSet = new GitSynchronizeDataSet(data);
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				dataSet);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		IFile local = mock(IFile.class);
@@ -450,8 +423,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	@Test
 	public void shouldReturnFalseWhenBaseDoesntExist() throws Exception {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		RevCommit baseCommit = testRepo.createInitialCommit("initial commit");
@@ -481,8 +453,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	public void shouldReturnFalseWhenRemoteVariantDoesntExist()
 			throws Exception {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		RevCommit remoteCommit = testRepo.createInitialCommit("initial commit");
@@ -512,8 +483,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	public void shouldReturnFalseWhenComparingRemoteVariantFileWithContainer()
 			throws Exception {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		File file = testRepo.createFile(iProject, "test" + File.separator
@@ -542,8 +512,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	public void shouldReturnFalseWhenComparingRemoteVariantContainerWithFile()
 			throws Exception {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		File file = testRepo.createFile(iProject, "test" + File.separator
@@ -573,8 +542,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	public void shouldReturnFalseWhenComparingRemoteVariantContainerWithContainer()
 			throws Exception {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		File file1 = testRepo.createFile(iProject, "test1" + File.separator
@@ -613,8 +581,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	public void shouldReturnTrueWhenComparingRemoteVariantContainerWithContainer()
 			throws Exception {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		File file1 = testRepo.createFile(iProject, "test1" + File.separator
@@ -644,8 +611,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	public void shouldReturnFalseWhenComparingRemoteVariantWithDifferentObjectId()
 			throws Exception {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		File file = testRepo.createFile(iProject, "test-file");
@@ -674,8 +640,7 @@ public class GitResourceVariantComparatorTest extends GitTestCase {
 	@Test
 	public void shouldReturnTrueWhenComparingRemoteVariant() throws Exception {
 		// when
-		GitResourceVariantComparator grvc = new GitResourceVariantComparator(
-				null);
+		GitResourceVariantComparator grvc = new GitResourceVariantComparator();
 
 		// given
 		File file = testRepo.createFile(iProject, "test-file");

@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.egit.core.synchronize;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -25,18 +24,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.Activator;
-import org.eclipse.egit.core.synchronize.dto.GitSynchronizeDataSet;
-import org.eclipse.team.core.TeamException;
 import org.eclipse.team.core.variants.IResourceVariant;
 import org.eclipse.team.core.variants.IResourceVariantComparator;
 
 class GitResourceVariantComparator implements IResourceVariantComparator {
-
-	private final GitSynchronizeDataSet gsd;
-
-	GitResourceVariantComparator(GitSynchronizeDataSet dataSet) {
-		gsd = dataSet;
-	}
 
 	@SuppressWarnings("resource")
 	public boolean compare(IResource local, IResourceVariant remote) {
@@ -54,7 +45,7 @@ class GitResourceVariantComparator implements IResourceVariantComparator {
 			try {
 				remoteStream = remote.getStorage(new NullProgressMonitor())
 						.getContents();
-				stream = getLocal(local);
+				stream = getLocal((IFile) local);
 				byte[] remoteBytes = new byte[8096];
 				byte[] bytes = new byte[8096];
 
@@ -111,22 +102,11 @@ class GitResourceVariantComparator implements IResourceVariantComparator {
 		return true;
 	}
 
-	private InputStream getLocal(IResource resource) throws CoreException {
-		if (gsd.getData(resource.getProject().getName()).shouldIncludeLocal())
-			return getSynchronizedFile(resource).getContents();
-		else
-			try {
-				if (resource.getType() == IResource.FILE)
-					return getSynchronizedFile(resource).getContents();
-				else
-					return new ByteArrayInputStream(new byte[0]);
-			} catch (TeamException e) {
-				throw new CoreException(e.getStatus());
-			}
+	private InputStream getLocal(IFile resource) throws CoreException {
+		return getSynchronizedFile(resource).getContents();
 	}
 
-	private IFile getSynchronizedFile(IResource resource) throws CoreException {
-		IFile file = ((IFile) resource);
+	private IFile getSynchronizedFile(IFile file) throws CoreException {
 		if (!file.isSynchronized(0))
 			file.refreshLocal(0, null);
 
