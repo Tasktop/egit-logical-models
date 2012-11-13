@@ -5,8 +5,15 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Dariusz Luksza <dariusz@luksza.org> - initial API and implementation
+ *     Laurent Goubet <laurent.goubet@obeo.fr> - Logical Model enhancements
+ *     Gunnar Wagenknecht <gunnar@wagenknecht.org> - Logical Model enhancements
  *******************************************************************************/
 package org.eclipse.egit.ui.internal.synchronize;
+
+import static org.eclipse.egit.core.synchronize.dto.GitSynchronizeData.WORKING_TREE;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +22,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.compare.CompareNavigator;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.ResourceNode;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -24,13 +33,13 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ModelProvider;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.egit.core.AdapterUtils;
 import org.eclipse.egit.core.project.GitProjectData;
 import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.egit.core.synchronize.GitResourceVariantTreeSubscriber;
@@ -198,28 +207,48 @@ public class GitModelSynchronizeParticipant extends ModelSynchronizeParticipant 
 	public boolean hasCompareInputFor(Object object) {
 		if (object instanceof GitModelBlob || object instanceof IFile)
 			return true;
+
 		// in Java Workspace model Java source files are passed as type
 		// CompilationUnit which can be adapted to IResource
-		if (object instanceof IAdaptable) {
-			IResource res = (IResource) ((IAdaptable) object)
-					.getAdapter(IResource.class);
-			if (res != null && res.getType() == IResource.FILE)
-				return true;
-		}
+		IResource res = AdapterUtils.adapt(object, IResource.class);
+		if (res != null && res.getType() == IResource.FILE)
+			return true;
+
+		// fallback to super ISynchronizationCompareAdapter
 		return super.hasCompareInputFor(object);
 	}
 
 	@Override
 	public ICompareInput asCompareInput(Object object) {
-		// handle file comparison in Workspace model
-		if (object instanceof IFile) {
-			IFile file = (IFile) object;
-			GitSynchronizeData gsd = gsds.getData(file.getProject());
-			if (!gsd.shouldIncludeLocal())
-				return getFileFromGit(gsd, file.getLocation());
+		ICompareInput compareInput = super.asCompareInput(object);
+
+		if(compareInput != null) {
+			// note, ResourceDiffCompareInput maybe returned from super;
+			// it always has the local resource on the left side!
+			// this is only ok if we are comparing with the working tree
+
+			// handle file comparison outside working tree
+			ITypedElement left = compareInput.getLeft();
+			if(left instanceof ResourceNode) {
+				// the left side can only be a resource node if
+				// we are comparing against the local working tree
+				IResource resource = ((ResourceNode) left).getResource();
+				if (resource.getType() == IResource.FILE) {
+					GitSynchronizeData gsd = gsds
+							.getData(resource.getProject());
+					if (!WORKING_TREE.equals(gsd.getSrcRev()))
+						return getFileFromGit(gsd, resource.getLocation());
+				}
+			}
+		} else {
+			IResource resource = AdapterUtils.adapt(object, IResource.class);
+			if (resource.getType() == IResource.FILE) {
+				GitSynchronizeData gsd = gsds.getData(resource.getProject());
+				return getFileFromGit(gsd, resource.getLocation());
+			}
 		}
 
-		return super.asCompareInput(object);
+		return compareInput;
 	}
 
 	@Override
