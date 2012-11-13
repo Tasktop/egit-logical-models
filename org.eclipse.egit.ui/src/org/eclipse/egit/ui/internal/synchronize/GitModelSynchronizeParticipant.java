@@ -26,11 +26,11 @@ import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.egit.core.project.GitProjectData;
 import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.egit.core.synchronize.GitResourceVariantTreeSubscriber;
@@ -58,8 +58,8 @@ import org.eclipse.team.ui.TeamUI;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 import org.eclipse.team.ui.synchronize.ModelSynchronizeParticipant;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
 
 /**
  * Git model synchronization participant
@@ -182,13 +182,13 @@ public class GitModelSynchronizeParticipant extends ModelSynchronizeParticipant 
 	public ModelProvider[] getEnabledModelProviders() {
 		ModelProvider[] avaliableProviders = super.getEnabledModelProviders();
 
-		for (ModelProvider provider : avaliableProviders)
+		// add GitChangeSetModelProvider if necessary
+		ArrayList<ModelProvider> providers = new ArrayList<ModelProvider>(avaliableProviders.length+1);
+		for (ModelProvider provider : avaliableProviders) {
 			if (provider.getId().equals(GitChangeSetModelProvider.ID))
 				return avaliableProviders;
-
-		int capacity = avaliableProviders.length + 1;
-		ArrayList<ModelProvider> providers = new ArrayList<ModelProvider>(
-				capacity);
+			providers.add(provider);
+		}
 		providers.add(GitChangeSetModelProvider.getProvider());
 
 		return providers.toArray(new ModelProvider[providers.size()]);
